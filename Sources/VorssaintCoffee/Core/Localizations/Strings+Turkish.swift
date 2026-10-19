@@ -55,7 +55,7 @@ extension Strings {
         keepAwakeMouseJiggleCaption: "Oturum sırasında seçilen aralıkta imleci biraz oynatır.",
         keepAwakeMouseJiggleInterval: "Aralık",
         keepAwakeActiveIconLabel: "Etkin simge",
-        keepAwakeActiveIconVorssaint: "Vorssaint Coffee",
+        keepAwakeActiveIconDot: "Nokta",
         keepAwakeActiveIconCoffee: "Kahve",
         keepAwakeActiveIconEye: "Göz",
         keepAwakeActiveIconMoon: "Ay",

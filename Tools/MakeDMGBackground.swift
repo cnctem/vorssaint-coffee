@@ -13,9 +13,6 @@ let widthPt: CGFloat = 600, heightPt: CGFloat = 400
 let px = Int(widthPt * scale), py = Int(heightPt * scale)
 
 let out = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "dmg-background.png"
-let scriptDir = URL(fileURLWithPath: CommandLine.arguments[0]).deletingLastPathComponent()
-let logoPath = scriptDir.deletingLastPathComponent().appendingPathComponent("Resources/Brand/logo.png").path
-
 guard let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: px, pixelsHigh: py,
                                  bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true,
                                  isPlanar: false, colorSpaceName: .deviceRGB,
@@ -69,16 +66,6 @@ NSColor(calibratedRed: 0.40, green: 0.34, blue: 0.78, alpha: 0.9).setStroke()
 arrow.stroke()
 
 NSGraphicsContext.restoreGraphicsState()
-
-// Embed the brand mark watermark faintly behind the title (optional, subtle).
-if let logo = NSImage(contentsOfFile: logoPath) {
-    NSGraphicsContext.saveGraphicsState()
-    NSGraphicsContext.current = ctx
-    ctx.cgContext.scaleBy(x: scale, y: scale)
-    let mark = NSRect(x: widthPt / 2 - 16, y: heightPt - 112, width: 32, height: 32)
-    logo.draw(in: mark, from: .zero, operation: .sourceOver, fraction: 0.12)
-    NSGraphicsContext.restoreGraphicsState()
-}
 
 guard let data = rep.representation(using: .png, properties: [:]) else { exit(1) }
 do {

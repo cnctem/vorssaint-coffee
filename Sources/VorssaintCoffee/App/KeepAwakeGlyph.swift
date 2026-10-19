@@ -3,53 +3,57 @@
 
 import AppKit
 
-/// The app's mark, bundled as a template image so the idle state adapts to
-/// light and dark menu bars. Active states can use real colors for attention.
+/// The menu bar glyph. The chosen shape is a template image in the idle state,
+/// so it follows the menu bar's light or dark appearance; an active session
+/// tints the same shape with the chosen color. The dot is the one shape that
+/// gets out of the way while a session runs.
 enum KeepAwakeGlyph {
-    /// Logical size of the glyph in the menu bar, in points. Tools/MakeIcon.swift
-    /// writes the bundled PNGs at this size.
+    /// Logical size of the glyph in the menu bar, in points.
     static let pointSize = NSSize(width: 26, height: 20)
 
-    /// Requested ink height for the active states' system symbols.
+    /// Requested ink height for system symbols.
     private static let symbolHeight: CGFloat = 16
 
-    /// Both scale representations go into one NSImage — loading the 1x file
-    /// alone would render blurry on Retina menu bars.
-    private static let base: NSImage? = {
-        let image = NSImage(size: pointSize)
-        for resource in ["MenuBarIcon", "MenuBarIcon@2x"] {
-            guard let url = Bundle.main.url(forResource: resource, withExtension: "png"),
-                  let data = try? Data(contentsOf: url),
-                  let rep = NSBitmapImageRep(data: data)
-            else { continue }
-            rep.size = pointSize
-            image.addRepresentation(rep)
-        }
-        guard !image.representations.isEmpty else { return nil }
-        image.isTemplate = true
-        return image
-    }()
-
+    /// The image for the menu bar, or nil when an active dot session should
+    /// leave the slot to the countdown text alone.
     static func image(active: Bool) -> NSImage? {
-        let tint = KeepAwakeIconTint.current
-        guard active else { return base ?? fallback(active: false) }
-        return activeImage(style: .current, tint: tint)
+        let style = KeepAwakeActiveIcon.current
+        if active, style == .dot { return nil }
+        guard active else { return templateImage(style: style) }
+        return activeImage(style: style, tint: .current)
     }
 
+    /// The shape in the active color. Also used by the icon picker, where even
+    /// the dot is shown.
     static func activeImage(style: KeepAwakeActiveIcon,
                             tint: KeepAwakeIconTint = .orange) -> NSImage? {
-        let source: NSImage?
-        if let symbolName = style.systemSymbolName {
-            source = fixedSizeSymbol(named: symbolName, drop: style.menuBarDrop)
-        } else {
-            source = base
-        }
-        guard let source else { return fallback(active: tint != .none) }
+        guard let source = templateImage(style: style) else { return fallback(active: tint != .none) }
         guard let color = color(for: tint) else {
             source.isTemplate = true
             return source
         }
         return tintedImage(source, color: color) ?? fallback(active: true)
+    }
+
+    /// The shape as a template image, filled with the menu bar's own color.
+    static func templateImage(style: KeepAwakeActiveIcon) -> NSImage? {
+        if style == .dot { return dotImage() }
+        guard let symbolName = style.systemSymbolName else { return nil }
+        return fixedSizeSymbol(named: symbolName, drop: style.menuBarDrop)
+    }
+
+    /// A small centered disc: the "·" choice, quiet until a session starts.
+    private static func dotImage() -> NSImage? {
+        let dot: CGFloat = 5.5
+        let image = NSImage(size: pointSize, flipped: false) { rect in
+            NSColor.black.setFill()
+            NSBezierPath(ovalIn: NSRect(x: rect.midX - dot / 2,
+                                        y: rect.midY - dot / 2,
+                                        width: dot, height: dot)).fill()
+            return true
+        }
+        image.isTemplate = true
+        return image
     }
 
     /// System symbols have different natural widths. Center them inside the

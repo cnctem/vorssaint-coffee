@@ -1,15 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Vorssaint
 
-// Generates all icon assets:
-// - the app iconset and .icns from the exported Default rendition of the
-//   adaptive source (Resources/Brand/AppIcon-Default.png)
-// - the menu bar template glyph and BrandMark from the wordmark master
-//   (Resources/Brand/logo.png)
-// AppIcon-Default.png is a hand-exported twin of Resources/Brand/AppIcon.icon;
-// re-export it whenever the Icon Composer project changes. The build cannot read
-// .icon bundles directly: actool exists only inside full Xcode 26, and the
-// supported local floor is Command Line Tools alone.
+// Generates the app iconset and .icns. The artwork is drawn here so the icon
+// has no binary masters to keep in sync: a warm coffee cup on a dark espresso
+// squircle, the same glyph the menu bar offers.
 import AppKit
 
 // Current macOS misreads PNG payloads in the legacy small chunks. It downsamples
@@ -23,48 +17,6 @@ let iconSizes: [(name: String, px: Int, icnsType: String?)] = [
 ]
 
 let outDir = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "AppIcon.iconset"
-let scriptDir = URL(fileURLWithPath: CommandLine.arguments[0]).deletingLastPathComponent()
-let projectDir = scriptDir.deletingLastPathComponent()
-let logoPath = projectDir.appendingPathComponent("Resources/Brand/logo.png").path
-
-guard let logo = NSImage(contentsOfFile: logoPath),
-      let logoTIFF = logo.tiffRepresentation,
-      let logoRep = NSBitmapImageRep(data: logoTIFF)
-else {
-    print("could not load \(logoPath)")
-    exit(1)
-}
-
-let appIconPath = projectDir.appendingPathComponent("Resources/Brand/AppIcon-Default.png").path
-guard let appIconMaster = NSImage(contentsOfFile: appIconPath) else {
-    print("could not load \(appIconPath)")
-    exit(1)
-}
-
-/// Bounding box of visible (non-transparent) pixels, so the mark can be
-/// centered optically regardless of padding in the source file.
-func contentBounds(of rep: NSBitmapImageRep) -> CGRect {
-    var minX = rep.pixelsWide, minY = rep.pixelsHigh, maxX = 0, maxY = 0
-    for y in 0..<rep.pixelsHigh {
-        for x in 0..<rep.pixelsWide {
-            if let color = rep.colorAt(x: x, y: y), color.alphaComponent > 0.05 {
-                minX = min(minX, x); maxX = max(maxX, x)
-                minY = min(minY, y); maxY = max(maxY, y)
-            }
-        }
-    }
-    guard maxX > minX, maxY > minY else {
-        return CGRect(x: 0, y: 0, width: rep.pixelsWide, height: rep.pixelsHigh)
-    }
-    return CGRect(x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1)
-}
-
-let bounds = contentBounds(of: logoRep)
-// NSImage draws bottom-up while colorAt() is top-down — flip Y for drawing.
-let sourceRect = CGRect(x: bounds.minX,
-                        y: CGFloat(logoRep.pixelsHigh) - bounds.maxY,
-                        width: bounds.width,
-                        height: bounds.height)
 
 func bitmapCanvas(_ px: Int, _ py: Int) -> NSBitmapImageRep? {
     NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: px, pixelsHigh: py,
@@ -73,73 +25,99 @@ func bitmapCanvas(_ px: Int, _ py: Int) -> NSBitmapImageRep? {
                      bytesPerRow: 0, bitsPerPixel: 0)
 }
 
-/// Draws the trimmed mark fitted into `target`, preserving aspect ratio.
-func drawMark(into target: CGRect) {
-    let scale = min(target.width / sourceRect.width, target.height / sourceRect.height)
-    let size = CGSize(width: sourceRect.width * scale, height: sourceRect.height * scale)
-    let rect = CGRect(x: target.midX - size.width / 2,
-                      y: target.midY - size.height / 2,
-                      width: size.width, height: size.height)
-    logo.draw(in: rect, from: sourceRect, operation: .sourceOver, fraction: 1,
-              respectFlipped: false, hints: [.interpolation: NSImageInterpolation.high.rawValue])
-}
+private let cream = NSColor(srgbRed: 0.965, green: 0.905, blue: 0.805, alpha: 1)
+private let creamShade = NSColor(srgbRed: 0.885, green: 0.795, blue: 0.665, alpha: 1)
+private let espresso = NSColor(srgbRed: 0.235, green: 0.135, blue: 0.080, alpha: 1)
+private let backgroundTop = NSColor(srgbRed: 0.420, green: 0.270, blue: 0.180, alpha: 1)
+private let backgroundBottom = NSColor(srgbRed: 0.150, green: 0.085, blue: 0.055, alpha: 1)
 
-// MARK: - App icon
+/// Draws one icon on a 1024-unit canvas, scaled to `rect`.
+func drawCoffeeIcon(in rect: NSRect) {
+    let unit = rect.width / 1024
+
+    func point(_ x: CGFloat, _ y: CGFloat) -> NSPoint {
+        NSPoint(x: rect.minX + x * unit, y: rect.minY + y * unit)
+    }
+    func box(_ x: CGFloat, _ y: CGFloat, _ w: CGFloat, _ h: CGFloat) -> NSRect {
+        NSRect(x: rect.minX + x * unit, y: rect.minY + y * unit,
+               width: w * unit, height: h * unit)
+    }
+
+    // The squircle: the standard Big Sur grid, 824 of 1024 with a 185 radius.
+    let squircle = NSBezierPath(roundedRect: box(100, 100, 824, 824),
+                                xRadius: 185 * unit, yRadius: 185 * unit)
+    NSGradient(colors: [backgroundTop, backgroundBottom])?.draw(in: squircle, angle: -90)
+
+    // A hairline of light along the top edge gives the body a rounded feel.
+    let highlight = NSBezierPath(roundedRect: box(108, 108, 808, 808),
+                                 xRadius: 178 * unit, yRadius: 178 * unit)
+    NSColor.white.withAlphaComponent(0.10).setStroke()
+    highlight.lineWidth = 5 * unit
+    highlight.stroke()
+
+    // Saucer: an ellipse with a shaded lower rim and a cream top.
+    let saucerShadow = NSBezierPath(ovalIn: box(236, 236, 552, 96))
+    NSColor.black.withAlphaComponent(0.22).setFill()
+    saucerShadow.fill()
+    let saucer = NSBezierPath(ovalIn: box(240, 252, 544, 88))
+    creamShade.setFill()
+    saucer.fill()
+    let saucerTop = NSBezierPath(ovalIn: box(272, 268, 480, 58))
+    cream.setFill()
+    saucerTop.fill()
+
+    // Handle first, so the cup body hides the part that meets it.
+    let handle = NSBezierPath(ovalIn: box(664, 366, 214, 196))
+    handle.lineWidth = 48 * unit
+    cream.setStroke()
+    handle.stroke()
+
+    // Cup body: a gently tapered vessel with rounded corners.
+    let body = NSBezierPath()
+    body.move(to: point(314, 560))
+    body.line(to: point(344, 348))
+    body.curve(to: point(392, 304), controlPoint1: point(346, 318), controlPoint2: point(366, 304))
+    body.line(to: point(632, 304))
+    body.curve(to: point(680, 348), controlPoint1: point(658, 304), controlPoint2: point(678, 318))
+    body.line(to: point(710, 560))
+    body.close()
+    cream.setFill()
+    body.fill()
+
+    // Rim and the coffee inside it.
+    let rim = NSBezierPath(ovalIn: box(302, 516, 420, 88))
+    cream.setFill()
+    rim.fill()
+    let coffee = NSBezierPath(ovalIn: box(332, 534, 360, 54))
+    espresso.setFill()
+    coffee.fill()
+    // A soft crescent of reflected light on the coffee surface.
+    let reflection = NSBezierPath(ovalIn: box(372, 545, 190, 26))
+    NSColor.white.withAlphaComponent(0.10).setFill()
+    reflection.fill()
+
+    // Steam: three S-curves rising from the cup.
+    NSColor.white.withAlphaComponent(0.52).setStroke()
+    for x in [420.0, 512.0, 604.0] {
+        let steam = NSBezierPath()
+        steam.lineWidth = 27 * unit
+        steam.lineCapStyle = .round
+        steam.move(to: point(x, 636))
+        steam.curve(to: point(x, 706), controlPoint1: point(x + 34, 654),
+                    controlPoint2: point(x + 34, 688))
+        steam.curve(to: point(x, 776), controlPoint1: point(x - 34, 724),
+                    controlPoint2: point(x - 34, 758))
+        steam.stroke()
+    }
+}
 
 func renderAppIcon(px: Int) -> Data? {
-    let size = CGFloat(px)
     guard let rep = bitmapCanvas(px, px), let ctx = NSGraphicsContext(bitmapImageRep: rep) else { return nil }
-    rep.size = NSSize(width: size, height: size)
-
-    // Every renderer in MakeIcon.swift focuses the graphics context before
-    // drawing; without this the draws land nowhere and the PNGs come out empty.
-    NSGraphicsContext.saveGraphicsState()
-    NSGraphicsContext.current = ctx
-    // The exported Default rendition is the finished icon design: background,
-    // layering and system-grid margins are baked in, so it maps onto the canvas
-    // 1:1 instead of being re-framed like the old mark-on-squircle composite.
-    // Source rect = the ENTIRE master, in the MASTER's coordinate space
-    // (appIconMaster.size), never the target's — a size-sized source rect would
-    // crop the bottom-left corner of the 1024x1024 master instead of scaling.
-    // (This SDK's draw(in:from:...) types from: as non-optional NSRect, so
-    // full-source must be spelled out rather than passed as nil.)
-    appIconMaster.draw(in: NSRect(x: 0, y: 0, width: size, height: size),
-                       from: NSRect(origin: .zero, size: appIconMaster.size),
-                       operation: .sourceOver, fraction: 1,
-                       respectFlipped: false,
-                       hints: [.interpolation: NSImageInterpolation.high.rawValue])
-    NSGraphicsContext.restoreGraphicsState()
-    return rep.representation(using: .png, properties: [:])
-}
-
-// MARK: - Menu bar glyph (template)
-
-// The mark is ~1.97:1, so fitting it into a fixed box made the width the
-// limiting side and left the height unused, rendering it far shorter than the
-// menu bar icons around it. Size from the height and let the width follow.
-let menuBarGlyphHeight: CGFloat = 12.5
-// Centered geometrically the mark reads high, since the thin ring tails carry
-// the bounding box below the planet body. Drop it onto the same visual floor
-// as its neighbours.
-let menuBarGlyphDrop: CGFloat = 1
-// Taller than the mark needs: the same canvas holds the compact Keep Awake
-// symbols. Keep in sync with BlackHoleGlyph.pointSize in
-// Sources/VorssaintCoffee/App/KeepAwakeGlyph.swift; `--selftest` enforces it.
-let menuBarCanvas = (width: 26, height: 20)
-
-func renderMenuBarIcon(scale: Int) -> Data? {
-    let width = menuBarCanvas.width * scale, height = menuBarCanvas.height * scale
-    guard let rep = bitmapCanvas(width, height), let ctx = NSGraphicsContext(bitmapImageRep: rep) else { return nil }
-    rep.size = NSSize(width: menuBarCanvas.width, height: menuBarCanvas.height)
+    rep.size = NSSize(width: px, height: px)
 
     NSGraphicsContext.saveGraphicsState()
     NSGraphicsContext.current = ctx
-    // Height-limited target spanning the full canvas width: drawMark keeps the
-    // aspect ratio and centers, landing the mark at 24.6×12.5 pt. Coordinates
-    // are bottom-up, so dropping it lowers y.
-    let ink = menuBarGlyphHeight * CGFloat(scale)
-    let y = (CGFloat(height) - ink) / 2 - menuBarGlyphDrop * CGFloat(scale)
-    drawMark(into: CGRect(x: 0, y: y, width: CGFloat(width), height: ink))
+    drawCoffeeIcon(in: NSRect(x: 0, y: 0, width: px, height: px))
     NSGraphicsContext.restoreGraphicsState()
     return rep.representation(using: .png, properties: [:])
 }
@@ -182,27 +160,4 @@ for (name, px, icnsType) in iconSizes {
     }
 }
 try writeICNS(entries: icnsEntries, to: URL(fileURLWithPath: "\(outDir)/../AppIcon.icns"))
-
-for scale in [1, 2] {
-    guard let data = renderMenuBarIcon(scale: scale) else {
-        print("failed to render menu bar icon @\(scale)x")
-        exit(1)
-    }
-    let suffix = scale == 1 ? "" : "@2x"
-    try data.write(to: URL(fileURLWithPath: "\(outDir)/../MenuBarIcon\(suffix).png"))
-}
-
-// Trimmed mark for in-app use (panel header, onboarding, About).
-let markWidth = 640
-let markHeight = Int(CGFloat(markWidth) * sourceRect.height / sourceRect.width)
-if let rep = bitmapCanvas(markWidth, markHeight), let ctx = NSGraphicsContext(bitmapImageRep: rep) {
-    rep.size = NSSize(width: markWidth, height: markHeight)
-    NSGraphicsContext.saveGraphicsState()
-    NSGraphicsContext.current = ctx
-    drawMark(into: CGRect(x: 0, y: 0, width: CGFloat(markWidth), height: CGFloat(markHeight)))
-    NSGraphicsContext.restoreGraphicsState()
-    if let data = rep.representation(using: .png, properties: [:]) {
-        try data.write(to: URL(fileURLWithPath: "\(outDir)/../BrandMark.png"))
-    }
-}
 print("iconset written to \(outDir)")

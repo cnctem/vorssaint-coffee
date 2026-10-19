@@ -55,7 +55,7 @@ extension Strings {
         keepAwakeMouseJiggleCaption: "Počas relácie jemne pohne kurzorom vo zvolenom intervale.",
         keepAwakeMouseJiggleInterval: "Interval",
         keepAwakeActiveIconLabel: "Ikona pri aktivite",
-        keepAwakeActiveIconVorssaint: "Vorssaint Coffee",
+        keepAwakeActiveIconDot: "Bodka",
         keepAwakeActiveIconCoffee: "Káva",
         keepAwakeActiveIconEye: "Oko",
         keepAwakeActiveIconMoon: "Mesiac",

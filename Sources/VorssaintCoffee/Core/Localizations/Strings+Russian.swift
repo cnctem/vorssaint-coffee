@@ -55,7 +55,7 @@ extension Strings {
         keepAwakeMouseJiggleCaption: "Во время сеанса слегка двигает указатель с выбранным интервалом.",
         keepAwakeMouseJiggleInterval: "Интервал",
         keepAwakeActiveIconLabel: "Активный значок",
-        keepAwakeActiveIconVorssaint: "Vorssaint Coffee",
+        keepAwakeActiveIconDot: "Точка",
         keepAwakeActiveIconCoffee: "Кофе",
         keepAwakeActiveIconEye: "Глаз",
         keepAwakeActiveIconMoon: "Луна",

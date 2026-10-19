@@ -55,7 +55,7 @@ extension Strings {
         keepAwakeMouseJiggleCaption: "会话期间按所选间隔轻微移动指针。",
         keepAwakeMouseJiggleInterval: "间隔",
         keepAwakeActiveIconLabel: "活跃图标",
-        keepAwakeActiveIconVorssaint: "Vorssaint Coffee",
+        keepAwakeActiveIconDot: "圆点",
         keepAwakeActiveIconCoffee: "咖啡",
         keepAwakeActiveIconEye: "眼睛",
         keepAwakeActiveIconMoon: "月亮",

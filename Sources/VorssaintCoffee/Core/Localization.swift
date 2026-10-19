@@ -200,7 +200,7 @@ struct Strings {
     let keepAwakeMouseJiggleCaption: String
     let keepAwakeMouseJiggleInterval: String
     let keepAwakeActiveIconLabel: String
-    let keepAwakeActiveIconVorssaint: String
+    let keepAwakeActiveIconDot: String
     let keepAwakeActiveIconCoffee: String
     let keepAwakeActiveIconEye: String
     let keepAwakeActiveIconMoon: String
@@ -332,7 +332,7 @@ extension Strings {
         keepAwakeMouseJiggleCaption: "Durante uma sessão, move o cursor um pouco no intervalo escolhido.",
         keepAwakeMouseJiggleInterval: "Intervalo",
         keepAwakeActiveIconLabel: "Ícone ativo",
-        keepAwakeActiveIconVorssaint: "Vorssaint Coffee",
+        keepAwakeActiveIconDot: "Ponto",
         keepAwakeActiveIconCoffee: "Café",
         keepAwakeActiveIconEye: "Olho",
         keepAwakeActiveIconMoon: "Lua",
@@ -465,7 +465,7 @@ extension Strings {
         keepAwakeMouseJiggleCaption: "During a session, moves the pointer a little at the chosen interval.",
         keepAwakeMouseJiggleInterval: "Interval",
         keepAwakeActiveIconLabel: "Active icon",
-        keepAwakeActiveIconVorssaint: "Vorssaint Coffee",
+        keepAwakeActiveIconDot: "Dot",
         keepAwakeActiveIconCoffee: "Coffee",
         keepAwakeActiveIconEye: "Eye",
         keepAwakeActiveIconMoon: "Moon",

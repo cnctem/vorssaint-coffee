@@ -55,7 +55,7 @@ extension Strings {
         keepAwakeMouseJiggleCaption: "Durante una sessione, muove un po’ il puntatore all’intervallo scelto.",
         keepAwakeMouseJiggleInterval: "Intervallo",
         keepAwakeActiveIconLabel: "Icona attiva",
-        keepAwakeActiveIconVorssaint: "Vorssaint Coffee",
+        keepAwakeActiveIconDot: "Punto",
         keepAwakeActiveIconCoffee: "Caffè",
         keepAwakeActiveIconEye: "Occhio",
         keepAwakeActiveIconMoon: "Luna",

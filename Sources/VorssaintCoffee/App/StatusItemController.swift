@@ -94,13 +94,19 @@ final class StatusItemController {
         let manager = KeepAwakeManager.shared
         let strings = L10n.shared.s
         let defaults = UserDefaults.standard
+        let style = KeepAwakeActiveIcon.current
+        // The dot leaves the icon slot to the countdown while a session runs,
+        // so that session always shows its time (or ∞) even when the countdown
+        // option is off.
+        let dotActive = manager.isActive && style == .dot
+        let showsCountdown = defaults.bool(forKey: DefaultsKey.showCountdown) || dotActive
 
         syncTitleTimer(keepAwakeActive: manager.isActive,
-                       showsCountdown: defaults.bool(forKey: DefaultsKey.showCountdown),
+                       showsCountdown: showsCountdown,
                        endDate: manager.endDate)
 
         var title = ""
-        if manager.isActive, defaults.bool(forKey: DefaultsKey.showCountdown) {
+        if manager.isActive, showsCountdown {
             if let end = manager.endDate {
                 let remaining = max(0, Int(end.timeIntervalSinceNow))
                 let hours = remaining / 3600
@@ -112,7 +118,12 @@ final class StatusItemController {
             }
         }
         if button.title != title { button.title = title }
-        button.imagePosition = title.isEmpty ? .imageOnly : .imageLeading
+        updateIcon(active: manager.isActive, style: style, button: button)
+        // A dot session has no image at all, so the text starts at the edge
+        // of the item instead of after an empty image slot.
+        button.imagePosition = button.image == nil
+            ? .noImage
+            : (title.isEmpty ? .imageOnly : .imageLeading)
 
         let toolTip: String
         if manager.isActive {
@@ -128,15 +139,13 @@ final class StatusItemController {
             toolTip = strings.statusIdleTooltip
         }
         if button.toolTip != toolTip { button.toolTip = toolTip }
-
-        updateIcon(active: manager.isActive, button: button)
     }
 
     private var renderedIconKey = ""
 
-    private func updateIcon(active: Bool, button: NSStatusBarButton) {
+    private func updateIcon(active: Bool, style: KeepAwakeActiveIcon, button: NSStatusBarButton) {
         let key = [String(active), KeepAwakeIconTint.current.rawValue,
-                   KeepAwakeActiveIcon.current.rawValue].joined(separator: "|")
+                   style.rawValue].joined(separator: "|")
         guard key != renderedIconKey else { return }
         renderedIconKey = key
         button.image = KeepAwakeGlyph.image(active: active)

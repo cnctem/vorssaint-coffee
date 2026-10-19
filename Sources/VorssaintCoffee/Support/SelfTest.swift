@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Vorssaint
 
+import AppKit
 import Foundation
 
 /// A dependency-free check of the pure decisions the app is built on, run by
@@ -48,6 +49,37 @@ enum SelfTest {
         expect(DurationPicker.choices.last == 0, "the indefinite preset stays reachable")
         expect(Defaults.allowedDurations == DurationPicker.choices,
                "the offered presets and the sanitized set agree")
+
+        // Menu bar glyphs. The brand option was retired, coffee is the default,
+        // every shape draws in both states, and only the dot disappears while
+        // a session runs.
+        expect(KeepAwakeActiveIcon.allCases == [.coffee, .eye, .moon, .light, .dot],
+               "the menu bar offers coffee, eye, moon, light and dot")
+        expect(Defaults.sanitizedKeepAwakeActiveIcon(nil) == .coffee,
+               "coffee is the default menu bar shape")
+        expect(Defaults.sanitizedKeepAwakeActiveIcon("vorssaint") == .coffee,
+               "the retired brand option migrates to coffee")
+        for style in KeepAwakeActiveIcon.allCases {
+            expect(KeepAwakeGlyph.templateImage(style: style) != nil,
+                   "\(style.rawValue) draws in the idle state")
+            expect(KeepAwakeGlyph.activeImage(style: style, tint: .orange) != nil,
+                   "\(style.rawValue) draws in the active state")
+        }
+        let defaults = UserDefaults.standard
+        let savedIcon = defaults.string(forKey: DefaultsKey.keepAwakeActiveIcon)
+        let savedTint = defaults.string(forKey: DefaultsKey.keepAwakeIconTint)
+        defaults.set(KeepAwakeActiveIcon.dot.rawValue, forKey: DefaultsKey.keepAwakeActiveIcon)
+        defaults.set(KeepAwakeIconTint.orange.rawValue, forKey: DefaultsKey.keepAwakeIconTint)
+        expect(KeepAwakeGlyph.image(active: false) != nil, "the idle dot stays in the bar")
+        expect(KeepAwakeGlyph.image(active: true) == nil,
+               "an active dot leaves the bar to the countdown")
+        defaults.set(KeepAwakeActiveIcon.coffee.rawValue, forKey: DefaultsKey.keepAwakeActiveIcon)
+        expect(KeepAwakeGlyph.image(active: false) != nil, "the idle coffee shape is drawn")
+        expect(KeepAwakeGlyph.image(active: true) != nil, "the active coffee shape is drawn")
+        if let savedIcon { defaults.set(savedIcon, forKey: DefaultsKey.keepAwakeActiveIcon) }
+        else { defaults.removeObject(forKey: DefaultsKey.keepAwakeActiveIcon) }
+        if let savedTint { defaults.set(savedTint, forKey: DefaultsKey.keepAwakeIconTint) }
+        else { defaults.removeObject(forKey: DefaultsKey.keepAwakeIconTint) }
 
         guard failures.isEmpty else {
             fputs("SELFTEST FAILED (\(failures.count)):\n", stderr)

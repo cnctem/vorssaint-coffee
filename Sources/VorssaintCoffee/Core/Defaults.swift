@@ -69,7 +69,7 @@ enum KeepAwakeIconTint: String, CaseIterable, Identifiable {
 }
 
 enum KeepAwakeActiveIcon: String, CaseIterable, Identifiable {
-    case vorssaint, coffee, eye, moon, light
+    case coffee, eye, moon, light, dot
 
     var id: String { rawValue }
 
@@ -81,7 +81,9 @@ enum KeepAwakeActiveIcon: String, CaseIterable, Identifiable {
 
     var systemSymbolName: String? {
         switch self {
-        case .vorssaint: return nil
+        // The dot is drawn locally: in a session it hides the icon entirely
+        // and leaves only the remaining time.
+        case .dot: return nil
         case .coffee: return "cup.and.saucer.fill"
         case .eye: return "eye.fill"
         case .moon: return "moon.fill"
@@ -96,17 +98,17 @@ enum KeepAwakeActiveIcon: String, CaseIterable, Identifiable {
         switch self {
         case .coffee: return 1
         case .light: return 0.5
-        case .vorssaint, .eye, .moon: return 0
+        case .eye, .moon, .dot: return 0
         }
     }
 
     func title(_ strings: Strings) -> String {
         switch self {
-        case .vorssaint: return strings.keepAwakeActiveIconVorssaint
         case .coffee: return strings.keepAwakeActiveIconCoffee
         case .eye: return strings.keepAwakeActiveIconEye
         case .moon: return strings.keepAwakeActiveIconMoon
         case .light: return strings.keepAwakeActiveIconLight
+        case .dot: return strings.keepAwakeActiveIconDot
         }
     }
 }
@@ -138,7 +140,7 @@ enum Defaults {
 
     static func sanitizedKeepAwakeActiveIcon(_ rawValue: String?) -> KeepAwakeActiveIcon {
         guard let rawValue, let icon = KeepAwakeActiveIcon(rawValue: rawValue) else {
-            return .vorssaint
+            return .coffee
         }
         return icon
     }
@@ -183,7 +185,7 @@ enum Defaults {
             DefaultsKey.launchAtLoginWanted: false,
             DefaultsKey.keepAwakeShortcut: KeepAwakeShortcut.keepAwakeDefault.storageValue,
             DefaultsKey.keepAwakeIconTint: KeepAwakeIconTint.orange.rawValue,
-            DefaultsKey.keepAwakeActiveIcon: KeepAwakeActiveIcon.vorssaint.rawValue,
+            DefaultsKey.keepAwakeActiveIcon: KeepAwakeActiveIcon.coffee.rawValue,
             DefaultsKey.showCountdown: true,
         ])
     }

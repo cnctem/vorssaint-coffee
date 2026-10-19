@@ -12,8 +12,6 @@
 	<string>VorssaintCoffee</string>
 	<key>CFBundleIconFile</key>
 	<string>AppIcon</string>
-	<key>CFBundleIconName</key>
-	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.vorssaint.coffee</string>
 	<key>CFBundleInfoDictionaryVersion</key>

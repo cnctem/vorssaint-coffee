@@ -27,9 +27,14 @@ assertions that keep a Mac awake.
   language, the global shortcut and About.
 - Keep Awake starts from the last used preset, the saved end time, or
   indefinitely, exactly as before.
-- The app is a little lighter at idle and much smaller on disk: the source
-  tree shrank from 662 Swift files (about 295,000 lines) to 43 files (about
-  7,900 lines), and the release bundle from about 80 MB to about 4.4 MB.
+- The app and its menu bar now carry a coffee identity. The app icon is a
+  coffee cup drawn programmatically, so no binary icon masters are needed. The
+  menu bar offers coffee, eye, moon, light and a dot; the chosen shape now
+  applies to both the idle and active states, while its color only shows while
+  a session runs. The dot shows nothing but the remaining time (or ∞) during a
+  session. Coffee is the default.
+- The source tree shrank from 662 Swift files (about 295,000 lines) to 43 files
+  (about 7,900 lines), and the release bundle from about 80 MB to about 2.1 MB.
 
 ### Removed
 - The feature hub and onboarding, app updates, release notes and support
