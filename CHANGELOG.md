@@ -7,12 +7,14 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Summary
-Vorssaint is now a focused Keep Awake app. Every other feature, its background
+Vorssaint Coffee is now a focused Keep Awake app. Every other feature, its background
 service, permission, bundled media and translation was removed, leaving one
 menu bar icon, one panel and one Settings window around the IOKit power
 assertions that keep a Mac awake.
 
 ### Changed
+- The app is named **Vorssaint Coffee**, with the bundle identifier
+  `com.vorssaint.coffee` (Developer builds use `com.vorssaint.coffee.dev`).
 - The app now does one job: Keep Awake. The menu bar panel carries the
   duration presets, the "until" picker, automation conditions, battery
   protection, closed-lid mode, the optional pointer jiggle and the icon choice.

@@ -43,7 +43,7 @@ def write(name, text):
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
 
-    keep_awake = "Sources/Vorssaint/Services/KeepAwakeManager.swift"
+    keep_awake = "Sources/VorssaintCoffee/Services/KeepAwakeManager.swift"
     keep_awake_methods = [
         "    func refreshPasswordlessStatus(",
         "    func activate(minutes:",
@@ -103,8 +103,8 @@ def main():
           + "".join(declaration(keep_awake, prefix).replace("private ", "", 1) for prefix in keep_awake_methods)
           + "}\n}\n"
           + "extension KeepAwakeLidSleepContract.Sudoers {\n"
-          + declaration("Sources/Vorssaint/Services/ShellSupport.swift", "    static func isConfigured()")
-          + declaration("Sources/Vorssaint/Services/ShellSupport.swift", "    static func restoreSleepWithAuthorization(")
+          + declaration("Sources/VorssaintCoffee/Services/ShellSupport.swift", "    static func isConfigured()")
+          + declaration("Sources/VorssaintCoffee/Services/ShellSupport.swift", "    static func restoreSleepWithAuthorization(")
           + "}\n")
     write("KeepAwakeTimerHandoff.swift", "import Foundation\n\nextension KeepAwakeTimerHandoffContract {\n"
           + "final class Service {\nvar sessionTrigger = SessionTrigger.manual\n"

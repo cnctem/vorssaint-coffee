@@ -1,11 +1,11 @@
 # Troubleshooting
 
-The commands below all point at Vorssaint's bundle identifier,
-`com.vorssaint.utils`.
+The commands below all point at Vorssaint Coffee's bundle identifier,
+`com.vorssaint.coffee`.
 
 ## The menu bar icon is gone
 
-Open Vorssaint again from Applications or Spotlight. A running copy rebuilds
+Open Vorssaint Coffee again from Applications or Spotlight. A running copy rebuilds
 the status item and pops the panel, so the icon comes back without a relaunch.
 If the menu bar is simply full, macOS may have moved the icon; check
 **System Settings → Control Center → Menu Bar Only**.
@@ -25,7 +25,7 @@ If the menu bar is simply full, macOS may have moved the icon; check
 ## Closed-lid mode keeps asking for a password
 
 The password-free rule is not in place, or a failed enable left sleep disabled.
-Quit and reopen Vorssaint; launch recovery restores sleep and re-probes the
+Quit and reopen Vorssaint Coffee; launch recovery restores sleep and re-probes the
 rule. To check it by hand:
 
 ```sh
@@ -37,13 +37,13 @@ on again re-installs it.
 
 ## Sleep stayed disabled after a crash
 
-Vorssaint writes a marker before disabling sleep and clears it after restoring.
+Vorssaint Coffee writes a marker before disabling sleep and clears it after restoring.
 A launch with the marker still set runs recovery and asks for your password if
 needed. To repair by hand:
 
 ```sh
 sudo pmset disablesleep 0
-defaults delete com.vorssaint.utils vorssDisabledSleep
+defaults delete com.vorssaint.coffee vorssDisabledSleep
 ```
 
 ## The pointer jiggle does nothing
@@ -53,13 +53,13 @@ Accessibility**, or use the request button beside the option. After a
 code-signing change, reset the stale grant:
 
 ```sh
-tccutil reset Accessibility com.vorssaint.utils
+tccutil reset Accessibility com.vorssaint.coffee
 ```
 
 ## Launch at login is not working
 
 Registering can succeed while macOS still needs approval. Check
-**System Settings → General → Login Items** and allow Vorssaint. The app also
+**System Settings → General → Login Items** and allow Vorssaint Coffee. The app also
 repairs a registration the system lost on the next launch.
 
 ## Remove everything
@@ -73,5 +73,5 @@ permissions and deletes the app and its preferences.
 
 ## Reporting a bug
 
-Include your macOS version, the Vorssaint version (About), what you did and
+Include your macOS version, the Vorssaint Coffee version (About), what you did and
 what happened. Email <hello@vorssaint.com>.

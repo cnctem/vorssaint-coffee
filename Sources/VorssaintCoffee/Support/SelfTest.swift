@@ -4,7 +4,7 @@
 import Foundation
 
 /// A dependency-free check of the pure decisions the app is built on, run by
-/// `build/Vorssaint --selftest` in CI and by hand.
+/// `build/VorssaintCoffee --selftest` in CI and by hand.
 enum SelfTest {
     static func runAndExit() -> Never {
         var failures: [String] = []

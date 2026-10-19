@@ -1,6 +1,6 @@
 # Privacy
 
-Vorssaint is local-first, and the streamlined build is local-only.
+Vorssaint Coffee is local-first, and the streamlined build is local-only.
 
 ## The short version
 
@@ -33,5 +33,5 @@ Nothing is uploaded, and nothing is shared with anyone.
 
 ## Notifications
 
-Vorssaint posts a local notification when a timed session ends and when battery
+Vorssaint Coffee posts a local notification when a timed session ends and when battery
 protection stops one. They are created and delivered by macOS on this Mac.

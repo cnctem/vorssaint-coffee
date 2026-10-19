@@ -8,7 +8,7 @@ import UserNotifications
 /// The two notifications Always Awake posts: a session that ran out its
 /// timer, and battery protection ending one to protect the charge.
 enum Notifier {
-    private static let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "vorssaint",
+    private static let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "vorssaint-coffee",
                                     category: "notifications")
 
     static func requestPermission() {

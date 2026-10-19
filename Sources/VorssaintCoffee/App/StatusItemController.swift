@@ -14,7 +14,7 @@ final class StatusItemController {
     private var cancellables = Set<AnyCancellable>()
     private var titleTimer: Timer?
     private var defaultsObserver: NSObjectProtocol?
-    private static let mainAutosaveName = "VorssaintMenuBarItem"
+    private static let mainAutosaveName = "VorssaintCoffeeMenuBarItem"
     private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.timeStyle = .short

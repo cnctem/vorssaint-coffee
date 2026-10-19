@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Vorssaint
 
-# Builds Vorssaint, assembles the .app bundle, signs it and (with --install)
+# Builds Vorssaint Coffee, assembles the .app bundle, signs it and (with --install)
 # installs it into /Applications.
 #
 # The bundle is staged in a temporary directory outside ~/Documents: folders synced
@@ -49,22 +49,22 @@ for arg in "$@"; do
 done
 
 if (( DEV )); then
-    APP_NAME="Vorssaint (Developer)"
-    EXECUTABLE="VorssaintDeveloper"
-    APP_BUNDLE_ID="com.vorssaint.utils.dev"
+    APP_NAME="Vorssaint Coffee (Developer)"
+    EXECUTABLE="VorssaintCoffeeDeveloper"
+    APP_BUNDLE_ID="com.vorssaint.coffee.dev"
     BUILD_VARIANT_FLAGS=(-D VORSSAINT_DEVELOPMENT)
     APP_OPTIMIZATION_FLAGS=(-Onone)
     BUILD_CONFIGURATION="debug"
 else
-    APP_NAME="Vorssaint"
-    EXECUTABLE="Vorssaint"
-    APP_BUNDLE_ID="com.vorssaint.utils"
+    APP_NAME="Vorssaint Coffee"
+    EXECUTABLE="VorssaintCoffee"
+    APP_BUNDLE_ID="com.vorssaint.coffee"
     BUILD_VARIANT_FLAGS=()
     APP_OPTIMIZATION_FLAGS=(-O)
     BUILD_CONFIGURATION="release"
 fi
 TARGET="arm64-apple-macosx14.0"
-ENTITLEMENTS="Resources/Vorssaint.entitlements"
+ENTITLEMENTS="Resources/VorssaintCoffee.entitlements"
 LEGACY_IDENTITY="Vorssaint Utils Signing"
 
 developer_id_identity() {
@@ -235,13 +235,13 @@ if (( TEST )); then
     TEST_OBJECT_DIR="build/objects/tests"
     mkdir -p "$TEST_OBJECT_DIR"
     TEST_SOURCES=(
-        Sources/Vorssaint/Core/Defaults.swift
-        Sources/Vorssaint/Core/KeepAwakeShortcut.swift
-        Sources/Vorssaint/Core/Localization.swift
-        Sources/Vorssaint/Core/Localizations/Strings+*.swift
-        Sources/Vorssaint/Services/KeepAwakeAutomationSupport.swift
-        Sources/Vorssaint/Services/LidDimmingSupport.swift
-        Sources/Vorssaint/Services/SudoersSupport.swift
+        Sources/VorssaintCoffee/Core/Defaults.swift
+        Sources/VorssaintCoffee/Core/KeepAwakeShortcut.swift
+        Sources/VorssaintCoffee/Core/Localization.swift
+        Sources/VorssaintCoffee/Core/Localizations/Strings+*.swift
+        Sources/VorssaintCoffee/Services/KeepAwakeAutomationSupport.swift
+        Sources/VorssaintCoffee/Services/LidDimmingSupport.swift
+        Sources/VorssaintCoffee/Services/SudoersSupport.swift
         Tests/*.swift
         build/generated-tests/*.swift
     )
@@ -259,7 +259,7 @@ if (( TEST )); then
 fi
 
 echo "▸ Compiling ($BUILD_CONFIGURATION) against $(basename "$SDK")…"
-APP_SOURCES=(Sources/Vorssaint/**/*.swift)
+APP_SOURCES=(Sources/VorssaintCoffee/**/*.swift)
 if (( ! DEV )); then
     # A release starts from an empty build directory, so nothing an earlier
     # build left behind (an old icon catalog, a staged bundle) can reach it.
@@ -333,7 +333,7 @@ if (( DEV )); then
     # testing, instead of unknowingly running a stale build. Dev-only; never shipped.
     SHA="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
     [[ -n "$(git status --porcelain 2>/dev/null)" ]] && SHA="$SHA-dirty"
-    /usr/libexec/PlistBuddy -c "Add :VorssaintBuildCommit string '$SHA · $(date '+%Y-%m-%d %H:%M')'" "$STAGE/Contents/Info.plist"
+    /usr/libexec/PlistBuddy -c "Add :VorssaintCoffeeBuildCommit string '$SHA · $(date '+%Y-%m-%d %H:%M')'" "$STAGE/Contents/Info.plist"
     echo "  stamped dev build: $SHA"
 fi
 printf 'APPL????' > "$STAGE/Contents/PkgInfo"

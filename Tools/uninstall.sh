@@ -2,23 +2,23 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Vorssaint
 
-# Cleanly removes the streamlined Vorssaint and the system state it created:
+# Cleanly removes the streamlined Vorssaint Coffee and the system state it created:
 # the login item, the closed-lid sleep override and its password-free sudoers
 # rule, TCC permissions, preferences, saved state and the app's data folder.
 set -uo pipefail
 
-BUNDLE="com.vorssaint.utils"
-APP="/Applications/Vorssaint.app"
+BUNDLE="com.vorssaint.coffee"
+APP="/Applications/Vorssaint Coffee.app"
 LEGACY_APP="/Applications/Vorssaint Utils.app"
 CLAMSHELL_RULES=(
-    /etc/sudoers.d/vorssaint-clamshell
+    /etc/sudoers.d/vorssaint-coffee-clamshell
     /etc/sudoers.d/vorssaint-clamshell
     /etc/sudoers.d/vorssaint-utils-clamshell
     /etc/sudoers.d/vorss-clamshell
 )
 
 echo "▸ Quitting…"
-pkill -x Vorssaint 2>/dev/null || true
+pkill -x VorssaintCoffee 2>/dev/null || true
 pkill -x Vorssaint 2>/dev/null || true
 pkill -x VorssaintUtils 2>/dev/null || true
 sleep 0.5
@@ -51,4 +51,4 @@ rm -rf "$HOME/Library/HTTPStorages/$BUNDLE" "$HOME/Library/HTTPStorages/$BUNDLE.
 # pattern, the ordinary case, and prints an error over a successful uninstall.
 rm -f "$HOME/Library/Preferences/ByHost/$BUNDLE".*.plist(N)
 
-echo "✓ Vorssaint removed."
+echo "✓ Vorssaint Coffee removed."

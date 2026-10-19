@@ -5,12 +5,12 @@
 import PackageDescription
 
 let package = Package(
-    name: "Vorssaint",
+    name: "VorssaintCoffee",
     platforms: [.macOS(.v14)],
     targets: [
         .executableTarget(
-            name: "Vorssaint",
-            path: "Sources/Vorssaint"
+            name: "VorssaintCoffee",
+            path: "Sources/VorssaintCoffee"
         )
     ]
 )

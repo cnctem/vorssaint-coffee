@@ -1,11 +1,11 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme/logo-dark.svg">
-    <img src="docs/assets/readme/logo.svg" width="220" alt="Vorssaint logo">
+    <img src="docs/assets/readme/logo.svg" width="220" alt="Vorssaint Coffee logo">
   </picture>
 </p>
 
-<h1 align="center">Vorssaint</h1>
+<h1 align="center">Vorssaint Coffee</h1>
 
 <p align="center">
   A focused menu bar app that keeps your Mac awake, and nothing else.
@@ -20,8 +20,8 @@
   <a href="mailto:hello@vorssaint.com">Contact</a>
 </p>
 
-This build is the streamlined edition: the original Vorssaint utilities minus
-everything that is not part of Keep Awake. The whole app is a single menu bar
+This build is the streamlined edition of the Vorssaint utilities: everything
+that is not part of Keep Awake is gone. The whole app is a single menu bar
 icon, one panel, one Settings window and the IOKit power assertions that keep a
 Mac awake.
 
@@ -57,7 +57,7 @@ code path and the small shell it needs.
 
 Download the latest disk image from the
 [releases page](https://github.com/vorssaint/vorssaint-utils/releases), open it
-and drag Vorssaint into Applications.
+and drag Vorssaint Coffee into Applications.
 
 ## Build
 
@@ -65,15 +65,15 @@ The build needs macOS 14 or newer, Apple Silicon and Xcode or the Command Line
 Tools.
 
 ```sh
-./build.sh            # build, stage and sign build/stage/Vorssaint.app
-./build.sh --dev      # a "Vorssaint (Developer)" variant with its own identity
+./build.sh            # build, stage and sign build/stage/VorssaintCoffee.app
+./build.sh --dev      # a "Vorssaint Coffee (Developer)" variant with its own identity
 ./build.sh --install  # install into /Applications
 ./build.sh --test     # run the unit suite
-./build/Vorssaint --selftest   # dependency-free checks of the core decisions
+./build/VorssaintCoffee --selftest   # dependency-free checks of the core decisions
 ```
 
-`--dev` keeps its own bundle identifier and preferences, so it can run beside
-the official app while you work on it.
+`--dev` keeps its own bundle identifier (`com.vorssaint.coffee.dev`) and
+preferences, so it can run beside the official app while you work on it.
 
 ## Privacy
 

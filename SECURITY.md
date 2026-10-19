@@ -1,6 +1,6 @@
 # Security Policy
 
-Thanks for helping keep Vorssaint and the people who use it safe.
+Thanks for helping keep Vorssaint Coffee and the people who use it safe.
 
 ## Reporting a vulnerability
 
@@ -16,7 +16,7 @@ When you write it up, please include as much as you can.
 
 - A description of the issue and the impact it could have.
 - Steps to reproduce, or a proof of concept.
-- The Vorssaint version from Settings under About and your macOS version.
+- The Vorssaint Coffee version from Settings under About and your macOS version.
 
 ## What to expect
 
@@ -30,4 +30,4 @@ Security fixes land on the latest released version. Before you report, please ma
 
 ## Scope
 
-Vorssaint runs locally and ships as a signed and notarized macOS app. The reports that matter most are the ones that could affect the integrity of the app or that could let its permissions, or the closed-lid `sudoers.d` rule, be misused.
+Vorssaint Coffee runs locally and ships as a signed and notarized macOS app. The reports that matter most are the ones that could affect the integrity of the app or that could let its permissions, or the closed-lid `sudoers.d` rule, be misused.

@@ -23,7 +23,7 @@ enum Shell {
 
 /// Runs a command with administrator privileges (system password prompt).
 enum AdminShell {
-    // Vorssaint is a menu-bar agent (LSUIElement), so it is rarely the active
+    // Vorssaint Coffee is a menu-bar agent (LSUIElement), so it is rarely the active
     // app. SecurityAgent attaches its password dialog to the requesting process;
     // when that process is an inactive agent the dialog can open behind the
     // frontmost app and read as "no prompt appeared". Bringing the app forward
@@ -84,15 +84,16 @@ enum AdminShell {
 /// NOPASSWD rule restricted to `pmset disablesleep 0/1`, so closed-lid mode can
 /// toggle without asking for the administrator password every time.
 enum Sudoers {
-    static let rulePath = "/etc/sudoers.d/vorssaint-clamshell"
+    static let rulePath = "/etc/sudoers.d/vorssaint-coffee-clamshell"
     private static let legacyRulePaths = [
+        "/etc/sudoers.d/vorssaint-clamshell",
         "/etc/sudoers.d/vorssaint-utils-clamshell",
         "/etc/sudoers.d/vorss-clamshell",
     ]
 
     /// Serializes native writes and read/reapply probes. Authorization runs
     /// separately with probes suspended.
-    private static let sleepStateQueue = DispatchQueue(label: "com.vorssaint.utils.pmset-state")
+    private static let sleepStateQueue = DispatchQueue(label: "com.vorssaint.coffee.pmset-state")
     private static var sleepStateProbeSuspensions = 0
 
     /// Proves the passwordless path by running it: re-applying the current

@@ -18,7 +18,7 @@ use the request button that appears next to the option in Settings or the panel.
 To reset the grant after a rebuild:
 
 ```sh
-tccutil reset Accessibility com.vorssaint.utils
+tccutil reset Accessibility com.vorssaint.coffee
 ```
 
 ## Administrator password (closed-lid mode)
@@ -27,7 +27,7 @@ The first time you switch on **Keep going with the lid closed**, macOS asks for
 your password to install the restricted rule at:
 
 ```
-/etc/sudoers.d/vorssaint-clamshell
+/etc/sudoers.d/vorssaint-coffee-clamshell
 ```
 
 The rule only allows `/usr/bin/pmset disablesleep 1` and
