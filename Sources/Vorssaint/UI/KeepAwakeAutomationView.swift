@@ -3,12 +3,13 @@
 
 import SwiftUI
 
+/// The conditions that start a Keep Awake session by themselves: an external
+/// display being attached, and the Mac running on power.
 struct KeepAwakeAutomationEditor: View {
     @ObservedObject private var l10n = L10n.shared
     @ObservedObject private var awake = KeepAwakeManager.shared
     @AppStorage(DefaultsKey.keepAwakeExternalDisplay) private var externalDisplay = false
     @AppStorage(DefaultsKey.keepAwakeConnectedToPower) private var connectedToPower = false
-    @AppStorage(DefaultsKey.keepAwakeRunningApps) private var runningApps = false
     @AppStorage(DefaultsKey.keepAwakeAutomationRequireAll) private var requireAll = false
 
     var compact = false
@@ -16,33 +17,21 @@ struct KeepAwakeAutomationEditor: View {
     var body: some View {
         VStack(alignment: .leading, spacing: compact ? 8 : 10) {
             HStack(alignment: .top, spacing: compact ? 6 : 8) {
-                conditionTile(
-                    title: strings.externalDisplayToggle,
-                    icon: "display",
-                    selected: externalDisplay
-                ) {
+                conditionTile(title: strings.externalDisplayToggle,
+                              icon: "display",
+                              selected: externalDisplay) {
                     externalDisplay.toggle()
                     awake.automationPreferencesDidChange()
                 }
-                conditionTile(
-                    title: strings.powerToggle,
-                    icon: "powerplug.fill",
-                    selected: connectedToPower
-                ) {
+                conditionTile(title: strings.powerToggle,
+                              icon: "powerplug.fill",
+                              selected: connectedToPower) {
                     connectedToPower.toggle()
-                    awake.automationPreferencesDidChange()
-                }
-                conditionTile(
-                    title: strings.runningAppsToggle,
-                    icon: "app.fill",
-                    selected: runningApps
-                ) {
-                    runningApps.toggle()
                     awake.automationPreferencesDidChange()
                 }
             }
             // One condition cannot be combined with anything, so the mode
-            // would be a control with no effect (issue #1587).
+            // would be a control with no effect.
             if selectedConditionCount > 1 {
                 Picker(selection: $requireAll) {
                     Text(strings.matchAny).tag(false)
@@ -56,31 +45,15 @@ struct KeepAwakeAutomationEditor: View {
                     awake.automationPreferencesDidChange()
                 }
             }
-            if runningApps {
-                AppBundleList(title: strings.runningAppsListTitle,
-                              caption: strings.runningAppsListCaption,
-                              addTitle: strings.runningAppsAddButton,
-                              removeLabel: strings.runningAppsRemoveButton,
-                              bundleIDs: awake.runningAppBundleIDs,
-                              reachesEveryApp: true,
-                              onAdd: { saveRunningApps(awake.runningAppBundleIDs + [$0]) },
-                              onRemove: { id in saveRunningApps(awake.runningAppBundleIDs.filter { $0 != id }) })
-            }
         }
     }
 
     private var selectedConditionCount: Int {
-        [externalDisplay, connectedToPower, runningApps].filter { $0 }.count
+        [externalDisplay, connectedToPower].filter { $0 }.count
     }
 
     private var strings: KeepAwakeAutomationStrings {
-        FeatureStrings.keepAwakeAutomation(l10n.language)
-    }
-
-    private func saveRunningApps(_ bundleIDs: [String]) {
-        let sanitized = Defaults.sanitizedBundleIdentifierList(bundleIDs)
-        UserDefaults.standard.set(sanitized, forKey: DefaultsKey.keepAwakeRunningAppBundleIDs)
-        awake.automationPreferencesDidChange()
+        KeepAwakeStrings.automation(l10n.language)
     }
 
     private func conditionTile(title: String,
@@ -120,5 +93,4 @@ struct KeepAwakeAutomationEditor: View {
         }
         .buttonStyle(.plain)
     }
-
 }

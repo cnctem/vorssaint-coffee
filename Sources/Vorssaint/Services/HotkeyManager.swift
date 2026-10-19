@@ -10,33 +10,34 @@ final class HotkeyManager: ObservableObject {
     static let shared = HotkeyManager()
 
     @Published private(set) var registrationFailed = false
+    @Published private(set) var isEnabled = false
+
     var onActivate: (() -> Void)?
 
     private var hotKeyRef: EventHotKeyRef?
     private var eventHandler: EventHandlerRef?
-    private var registeredShortcut: GlobalShortcut?
+    private var registeredShortcut: KeepAwakeShortcut?
 
     private init() {}
 
+    /// Re-reads the preference and the saved shortcut.
     func syncWithPreferences() {
-        setEnabled(AppFeature.keepAwake.isAvailable
-            && UserDefaults.standard.bool(forKey: DefaultsKey.hotkeyEnabled))
+        setEnabled(UserDefaults.standard.bool(forKey: DefaultsKey.hotkeyEnabled))
     }
 
     func setEnabled(_ enabled: Bool) {
+        isEnabled = enabled
         enabled ? register() : unregister()
     }
 
     private func register() {
-        let shortcut = GlobalShortcut.saved(for: DefaultsKey.keepAwakeShortcut,
-                                            fallback: .keepAwakeDefault)
+        let shortcut = KeepAwakeShortcut.saved(for: DefaultsKey.keepAwakeShortcut,
+                                               fallback: .keepAwakeDefault)
         if hotKeyRef != nil, registeredShortcut == shortcut { return }
         unregister()
         if eventHandler == nil {
             var spec = EventTypeSpec(eventClass: OSType(kEventClassKeyboard),
                                      eventKind: UInt32(kEventHotKeyPressed))
-            // The dispatcher delivers every registered hotkey to every handler,
-            // so filter by id — other features (e.g. the shelf) register their own.
             InstallEventHandler(GetEventDispatcherTarget(), { _, event, userData -> OSStatus in
                 guard let userData else { return OSStatus(eventNotHandledErr) }
                 var hotKeyID = EventHotKeyID()
@@ -45,11 +46,6 @@ final class HotkeyManager: ObservableObject {
                                       EventParamType(typeEventHotKeyID), nil,
                                       MemoryLayout<EventHotKeyID>.size, nil, &hotKeyID)
                 }
-                // Not our hotkey: hand it back so the dispatcher keeps walking the
-                // handler chain (the shelf installs its own handler on the same
-                // target). Returning noErr here would swallow the shelf's key.
-                // The signature must be checked too — ids alone repeat across
-                // the app's registrars and would hijack another feature's key.
                 guard hotKeyID.signature == 0x5655_544C, hotKeyID.id == 1
                 else { return OSStatus(eventNotHandledErr) }
                 let manager = Unmanaged<HotkeyManager>.fromOpaque(userData).takeUnretainedValue()
@@ -69,7 +65,6 @@ final class HotkeyManager: ObservableObject {
             hotKeyRef = ref
             registeredShortcut = shortcut
             registrationFailed = false
-            SystemShortcutTakeover.claim(DefaultsKey.keepAwakeShortcut, shortcut: shortcut)
         } else {
             hotKeyRef = nil
             registeredShortcut = nil
@@ -81,7 +76,6 @@ final class HotkeyManager: ObservableObject {
         if let ref = hotKeyRef {
             UnregisterEventHotKey(ref)
             hotKeyRef = nil
-            SystemShortcutTakeover.release(DefaultsKey.keepAwakeShortcut)
         }
         registeredShortcut = nil
         registrationFailed = false

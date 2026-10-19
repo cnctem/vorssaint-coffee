@@ -3,8 +3,8 @@
 
 import Foundation
 
-/// Shared assertions for both the full run and selected suites. Recording a
-/// failure never stops the remaining assertions; the runner owns the exit code.
+/// Shared assertions for the streamlined test run. Recording a failure never
+/// stops the remaining assertions; the runner owns the exit code.
 final class TestSuite {
     private let lock = NSLock()
     private(set) var checks = 0
@@ -66,32 +66,5 @@ enum TestHarnessTests {
         accepted.expectClose(-1.25, -1, "negative values", tol: 0.25)
         suite.expect(accepted.failures.isEmpty && accepted.checks == 3,
                      "finite comparisons retain exact and tolerance-boundary behavior")
-
-        let reference = TestFormat.parse("%1$d items in %2$@")?.arguments
-        suite.expect(reference == [1: "d", 2: "@"], "format arguments have explicit identities")
-        suite.expect(TestFormat.parse("%2$@: %1$d")?.arguments == reference,
-                     "a translation can reorder arguments while keeping their identities")
-        suite.expect(TestFormat.parse("%1$@ %2$d")?.arguments != reference,
-                     "swapping argument types is rejected even when the conversion letters match")
-        suite.expect(TestFormat.parse("%ld")?.arguments != TestFormat.parse("%lf")?.arguments,
-                     "a length modifier never hides the argument's conversion type")
-        suite.expect(TestFormat.parse("100%%")?.arguments.isEmpty == true,
-                     "an escaped percent is literal text")
-        for invalid in ["%", "%?", "%1$d %1$@", "%1$d %@", "%999999999999999999999999$@"] {
-            suite.expect(TestFormat.parse(invalid) == nil, "invalid format is rejected: \(invalid)")
-        }
-
-        struct TextFixture { let title: String; let statusFormat: String }
-        let base = TextFixture(title: "Ready", statusFormat: "%1$d in %2$@")
-        let invalidText = TestSuite()
-        LocalizationTests.check(TextFixture(title: " \n", statusFormat: "%1$@ in %2$d"),
-                                against: base, name: "fixture", suite: invalidText)
-        suite.expect(invalidText.failures.count == 2,
-                     "localization validation detects missing text and unsafe argument swaps")
-        let revisedText = TestSuite()
-        LocalizationTests.check(TextFixture(title: "A different valid phrase", statusFormat: "%2$@: %1$d"),
-                                against: base, name: "fixture", suite: revisedText)
-        suite.expect(revisedText.failures.isEmpty,
-                     "valid editorial changes and safe argument reordering remain allowed")
     }
 }

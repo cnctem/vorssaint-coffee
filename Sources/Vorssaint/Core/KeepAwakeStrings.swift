@@ -44,8 +44,10 @@ struct KeepAwakeDisplaySleepStrings {
     let allowDisplaySleepCaption: String
 }
 
-extension FeatureStrings {
-    static func keepAwakeAutomation(_ language: AppLanguage) -> KeepAwakeAutomationStrings {
+/// The keep-awake string tables. Kept in one place so each language's
+/// automation and display-sleep wording sits beside its own catalog.
+enum KeepAwakeStrings {
+    static func automation(_ language: AppLanguage) -> KeepAwakeAutomationStrings {
         switch language {
         case .enUS: return .enUS
         case .ptBR: return .ptBR
@@ -65,7 +67,7 @@ extension FeatureStrings {
         }
     }
 
-    static func keepAwakeDisplaySleep(_ language: AppLanguage) -> KeepAwakeDisplaySleepStrings {
+    static func displaySleep(_ language: AppLanguage) -> KeepAwakeDisplaySleepStrings {
         switch language {
         case .enUS: return .enUS
         case .ptBR: return .ptBR

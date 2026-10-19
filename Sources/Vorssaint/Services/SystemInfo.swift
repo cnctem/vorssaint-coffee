@@ -9,29 +9,26 @@ struct BatteryInfo: Equatable {
     let percent: Int
     let isCharging: Bool
     let isOnBattery: Bool
-    /// Read from the power source state rather than taken as the opposite of
-    /// `isOnBattery`: a description that omits the key answers neither.
     let isOnExternalPower: Bool
 }
 
-/// Point-in-time system facts that need no special permissions.
-/// The battery snapshot feeds the keep-awake battery protection; the memory
-/// reading feeds the system monitor.
+/// Point-in-time system facts the keep-awake feature needs.
 enum SystemInfo {
-    static func wallClockUptimeSeconds(now: Date = Date()) -> Int? {
-        var bootTime = timeval()
-        var size = MemoryLayout<timeval>.stride
-        guard sysctlbyname("kern.boottime", &bootTime, &size, nil, 0) == 0 else { return nil }
-        guard bootTime.tv_sec > 0 else { return nil }
-
-        let bootSeconds = Double(bootTime.tv_sec) + Double(bootTime.tv_usec) / 1_000_000
-        let elapsed = now.timeIntervalSince1970 - bootSeconds
-        guard elapsed.isFinite, elapsed >= 0 else { return nil }
-        return Int(elapsed.rounded(.down))
-    }
+    /// Internal-battery presence is immutable for the lifetime of a Mac boot.
+    /// Apple silicon desktops publish the battery service too, with
+    /// BatteryInstalled false.
+    static let hasInternalBattery: Bool = {
+        let service = IOServiceGetMatchingService(kIOMainPortDefault,
+                                                  IOServiceMatching("AppleSmartBattery"))
+        guard service != 0 else { return false }
+        defer { IOObjectRelease(service) }
+        let installed = IORegistryEntryCreateCFProperty(service, "BatteryInstalled" as CFString,
+                                                        kCFAllocatorDefault, 0)?.takeRetainedValue()
+        return (installed as? Bool) != false
+    }()
 
     static func batterySnapshot() -> BatteryInfo? {
-        guard PowerSampler.hasInternalBattery else { return nil }
+        guard hasInternalBattery else { return nil }
         guard let blobRef = IOPSCopyPowerSourcesInfo() else { return nil }
         let blob = blobRef.takeRetainedValue()
         guard let listRef = IOPSCopyPowerSourcesList(blob) else { return nil }
@@ -50,37 +47,5 @@ enum SystemInfo {
                            isCharging: charging,
                            isOnBattery: state == "Battery Power",
                            isOnExternalPower: state == "AC Power")
-    }
-
-    static func memoryUsage() -> (used: UInt64, appUsed: UInt64, total: UInt64, compressed: UInt64, cached: UInt64, swapUsed: UInt64?)? {
-        guard let stats = VMStatisticsDecoder.read() else { return nil }
-        let total = ProcessInfo.processInfo.physicalMemory
-        let pageSize = UInt64(vm_kernel_page_size)
-        let tagStoragePages = VMStatisticsDecoder.validatedTagStoragePages(
-            stats.tagStoragePages,
-            totalBytes: total,
-            pageSize: pageSize)
-        let appUsed = MetricFormat.appMemory(totalBytes: total,
-                                             pageSize: pageSize,
-                                             internalPages: stats.internalPages,
-                                             purgeablePages: stats.purgeablePages)
-        let used = MetricFormat.memoryUsed(totalBytes: total,
-                                           appBytes: appUsed,
-                                           pageSize: pageSize,
-                                           wiredPages: stats.wiredPages,
-                                           compressorPages: stats.compressorPages,
-                                           tagStoragePages: tagStoragePages)
-        let compressed = MetricFormat.compressedMemory(totalBytes: total,
-                                                       pageSize: pageSize,
-                                                       compressorPages: stats.compressorPages)
-        let cached = MetricFormat.cachedFiles(totalBytes: total,
-                                              pageSize: pageSize,
-                                              fileBackedPages: stats.externalPages)
-        var swap = xsw_usage()
-        var swapSize = MemoryLayout<xsw_usage>.stride
-        let swapUsed = sysctlbyname("vm.swapusage", &swap, &swapSize, nil, 0) == 0
-            ? swap.xsu_used
-            : nil
-        return (used, appUsed, total, compressed, cached, swapUsed)
     }
 }

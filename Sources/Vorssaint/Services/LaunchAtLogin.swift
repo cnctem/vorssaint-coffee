@@ -121,12 +121,10 @@ enum LaunchAtLogin {
     }
 
     private static var locationIsUnstable: Bool {
-        UpdateInstallerSupport.runsFromImmutableLocation(
-            appPath: Bundle.main.bundlePath,
-            volumeIsReadOnly: { path in
-                let values = try? URL(fileURLWithPath: path)
-                    .resourceValues(forKeys: [.volumeIsReadOnlyKey])
-                return values?.volumeIsReadOnly ?? true
-            })
+        let appPath = Bundle.main.bundlePath
+        if appPath.contains("/AppTranslocation/") { return true }
+        let values = try? URL(fileURLWithPath: appPath)
+            .resourceValues(forKeys: [.volumeIsReadOnlyKey])
+        return values?.volumeIsReadOnly ?? true
     }
 }

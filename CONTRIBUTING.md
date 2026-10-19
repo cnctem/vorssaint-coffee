@@ -29,7 +29,8 @@ Developer and install builds automatically try to create a stable local signing
 identity when none is available. You can also run `./Tools/setup-signing.sh`.
 Keep that identity across rebuilds: ad-hoc signatures change with the binary and
 can invalidate macOS permission grants. Check the build output for signing
-failures. For stale grants, see [troubleshooting](docs/TROUBLESHOOTING.md#resetting-permissions).
+failures. For stale grants, see
+[troubleshooting](docs/TROUBLESHOOTING.md#the-pointer-jiggle-does-nothing).
 
 Official releases use Developer ID signing and notarization through the protected
 release workflow. Local signing does not produce an official release.
@@ -45,17 +46,12 @@ over a new subsystem. Keep each PR focused on one independently useful change.
   in `Core`, behavior in `Services`, views in `UI`, and diagnostics in `Support`.
   Keep reusable decisions outside views where they can be tested.
 - Check other callers and the upgrade path when fixing shared behavior.
-- New features belong in the feature catalog, with availability and permission
-  checks on every entry point. Optional background work should stop when disabled.
-- User preferences must participate in settings backup. Machine-specific state
-  and private content need an explicit exclusion.
-- Update every locale in `AppLanguage.allCases`, including feature-specific
-  string catalogs. A new language also needs its locale registration, localized
-  permission prompts where applicable, and coverage tests.
+- Keep the app to the Keep Awake feature. Optional background work must stop when
+  its option is off, and nothing may be added that needs a permission the core
+  feature does not already use.
+- Update every locale in `AppLanguage.allCases`, including the keep-awake string
+  catalogs.
 - New source files retain the project's SPDX license and copyright headers.
-
-Sensor changes should include a dump from `./build/Vorssaint --sensors` and the
-Mac model. Selection logic lives in `TemperatureSensorSelector` and `SystemMonitor`.
 
 ## Validation
 
