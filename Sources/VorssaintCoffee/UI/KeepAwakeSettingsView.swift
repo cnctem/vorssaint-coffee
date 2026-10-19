@@ -326,6 +326,12 @@ struct KeepAwakeSettingsView: View {
     private func refreshLaunchAtLogin() {
         LaunchAtLogin.refresh { registration in
             loginRegistration = registration
+            // Startup no longer opens Service Management just to look, so an
+            // enable made in System Settings is adopted the first time this
+            // page reads it.
+            if registration == .enabled {
+                UserDefaults.standard.set(true, forKey: DefaultsKey.launchAtLoginWanted)
+            }
         }
     }
 

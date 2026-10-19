@@ -15,6 +15,11 @@ assertions that keep a Mac awake.
 ### Changed
 - The app is named **Vorssaint Coffee**, with the bundle identifier
   `com.vorssaint.coffee` (Developer builds use `com.vorssaint.coffee.dev`).
+- The app loads less at launch: the notification service, the login-item
+  service and the SwiftUI panel are all brought up on first use instead of on
+  every start. Idle memory drops from about 16 MB to about 13 MB, and the
+  notification permission is now asked when a session first starts rather than
+  at launch.
 - The app now does one job: Keep Awake. The menu bar panel carries the
   duration presets, the "until" picker, automation conditions, battery
   protection, closed-lid mode, the optional pointer jiggle and the icon choice.

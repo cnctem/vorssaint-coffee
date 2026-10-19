@@ -4,27 +4,24 @@
 import AppKit
 import Combine
 import SwiftUI
-import UserNotifications
 
 final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowDelegate {
     private var statusController: StatusItemController!
     private let popover = NSPopover()
     private var settingsWindow: NSWindow?
     private var cancellables = Set<AnyCancellable>()
+    private var askedForNotificationPermission = false
 
     // MARK: - Lifecycle
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
-        // UNUserNotificationCenter aborts in a process without a bundle; the
-        // guard keeps ad-hoc runs of the bare binary alive for probing.
-        if Bundle.main.bundleIdentifier != nil {
-            UNUserNotificationCenter.current().delegate = self
-            Notifier.requestPermission()
-        }
-        installMainMenu()
 
-        LaunchAtLogin.repairAtStartup()
+        // Service Management is loaded only when the user actually asked for a
+        // login item; a launch that never uses it should not pay for it.
+        if UserDefaults.standard.bool(forKey: DefaultsKey.launchAtLoginWanted) {
+            LaunchAtLogin.repairAtStartup()
+        }
 
         statusController = StatusItemController()
         statusController.onLeftClick = { [weak self] in self?.togglePopover() }
@@ -58,10 +55,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
             KeepAwakeManager.shared.activateOnLaunchIfNeeded()
         }
 
+        // The notification permission is asked the first time a session starts,
+        // not at launch: a notification can only ever follow a session, and an
+        // idle menu bar app has no reason to open the notification service.
+        KeepAwakeManager.shared.$isActive
+            .filter { $0 }
+            .prefix(1)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self, !self.askedForNotificationPermission else { return }
+                self.askedForNotificationPermission = true
+                Notifier.requestPermission()
+            }
+            .store(in: &cancellables)
+
         L10n.shared.$language
             .dropFirst()
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in self?.installMainMenu() }
+            .sink { [weak self] _ in
+                guard let self, self.settingsWindow != nil else { return }
+                self.installMainMenu()
+            }
             .store(in: &cancellables)
 
         NotificationCenter.default.addObserver(self, selector: #selector(appBecameActive),
@@ -154,6 +168,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
     private func setUpPopover() {
         popover.behavior = .transient
         popover.animates = true
+        popover.delegate = self
+    }
+
+    /// Builds the SwiftUI panel the first time it is actually shown. Creating
+    /// the hosting controller at launch would load and lay out a view tree that
+    /// most launches never display.
+    private func ensurePopoverContent() {
+        guard popover.contentViewController == nil else { return }
         let panel = KeepAwakePanelView(
             onOpenSettings: { [weak self] in
                 self?.popover.performClose(nil)
@@ -164,13 +186,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         let host = NSHostingController(rootView: panel)
         host.sizingOptions = .preferredContentSize
         popover.contentViewController = host
-        popover.delegate = self
     }
 
     private func togglePopover() {
         if popover.isShown {
             popover.performClose(nil)
         } else if let button = statusController?.button {
+            ensurePopoverContent()
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             popover.contentViewController?.view.window?.makeKey()
         }
@@ -254,6 +276,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
     }
 
     private func openSettingsWindow() {
+        // The standard shortcuts only matter while one of the app's own windows
+        // is focused, so the main menu is built with the first one.
+        installMainMenu()
         if let settingsWindow {
             settingsWindow.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
@@ -278,13 +303,5 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         guard let window = notification.object as? NSWindow, window === settingsWindow else { return }
         settingsWindow = nil
         if !popover.isShown { NSApp.deactivate() }
-    }
-}
-
-extension AppDelegate: UNUserNotificationCenterDelegate {
-    func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                willPresent notification: UNNotification,
-                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        completionHandler([.banner, .sound])
     }
 }
