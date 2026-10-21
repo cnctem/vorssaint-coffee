@@ -32,8 +32,9 @@ can invalidate macOS permission grants. Check the build output for signing
 failures. For stale grants, see
 [troubleshooting](docs/TROUBLESHOOTING.md#the-pointer-jiggle-does-nothing).
 
-Official releases use Developer ID signing and notarization through the protected
-release workflow. Local signing does not produce an official release.
+Official releases are ad-hoc signed and not notarized, so the release workflow
+needs no Apple credentials or repository secrets. Local signing does not produce
+an official release.
 
 ## Scope and implementation
 
@@ -101,14 +102,13 @@ Report vulnerabilities through [private security reporting](SECURITY.md).
 Integrating into `main`, pushing a branch and opening a PR do not publish a release.
 Publication requires an explicit release decision, including beta or stable.
 
-Before sending a version tag, validate the final commit on `main`, confirm its
-verified signature, and match `Resources/Info.plist` and the release notes to the
-chosen version. Use a signed tag such as `vX.Y.Z-beta.N` or `vX.Y.Z`.
-Sending the tag starts [the release workflow](.github/workflows/release.yml).
+Before sending a version tag, validate the final commit, and match
+`Resources/Info.plist` and the release notes to the chosen version. Use a tag
+such as `X.Y.Z` or `vX.Y.Z` (`X.Y.Z-beta.N` for a beta). Sending the tag starts
+[the release workflow](.github/workflows/release.yml).
 
-The protected `release-signing` environment holds the signing and notarization
-credentials. The workflow builds, signs and notarizes the app and DMG, then
-publishes an immutable release. Confirm publication succeeded; a pushed tag alone
-is not a published version. Beta releases remain prereleases and do not replace
-the latest stable release or its Homebrew cask. Do not move published tags or
-replace published artifacts.
+The workflow runs the tests, builds the app and DMG ad-hoc signed (it needs no
+Apple credentials or repository secrets), then publishes the release. Confirm
+publication succeeded; a pushed tag alone is not a published version. Beta
+releases remain prereleases and do not replace the latest stable release or its
+Homebrew cask. Do not move published tags or replace published artifacts.
