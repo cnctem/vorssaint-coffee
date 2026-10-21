@@ -104,7 +104,7 @@ Publication requires an explicit release decision, including beta or stable.
 
 Before sending a version tag, validate the final commit, and match
 `Resources/Info.plist` and the release notes to the chosen version. Use a tag
-such as `vX.Y.Z-beta.N` or `vX.Y.Z`. Sending the tag starts
+such as `X.Y.Z` or `vX.Y.Z` (`X.Y.Z-beta.N` for a beta). Sending the tag starts
 [the release workflow](.github/workflows/release.yml).
 
 The workflow runs the tests, builds the app and DMG ad-hoc signed (it needs no
