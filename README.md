@@ -1,8 +1,5 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme/logo-dark.svg">
-    <img src="docs/assets/readme/logo.svg" width="220" alt="Vorssaint Coffee logo">
-  </picture>
+  <img src="docs/assets/readme/icon.png" width="160" alt="Vorssaint Coffee app icon">
 </p>
 
 <h1 align="center">Vorssaint Coffee</h1>
