@@ -55,9 +55,10 @@ code path and the small shell it needs.
 
 ## Install
 
-Download the latest disk image from the
-[releases page](https://github.com/vorssaint/vorssaint-utils/releases), open it
-and drag Vorssaint Coffee into Applications.
+Download the latest disk image from the [releases page](../../releases), open
+it and drag Vorssaint Coffee into Applications. The build is ad-hoc signed and
+not notarized, so the first launch needs confirmation in System Settings →
+Privacy & Security → Open Anyway.
 
 ## Build
 
@@ -65,7 +66,7 @@ The build needs macOS 14 or newer, Apple Silicon and Xcode or the Command Line
 Tools.
 
 ```sh
-./build.sh            # build, stage and sign build/stage/VorssaintCoffee.app
+./build.sh            # build, stage and sign build/stage/Vorssaint Coffee.app
 ./build.sh --dev      # a "Vorssaint Coffee (Developer)" variant with its own identity
 ./build.sh --install  # install into /Applications
 ./build.sh --test     # run the unit suite

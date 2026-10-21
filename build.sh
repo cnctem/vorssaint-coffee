@@ -97,8 +97,8 @@ legacy_identity_installed() {
 # up front instead of falling through to ad-hoc — setup-signing.sh is free,
 # offline and idempotent. Gating on the install rather than the variant keeps
 # this off CI, where neither ci.yml nor release.yml passes --install.
-if (( DEV || INSTALL )) && [[ -z "$(developer_id_identity)" ]] \
-    && ! legacy_identity_installed; then
+if (( DEV || INSTALL )) && [[ "${VORSSAINT_ADHOC_SIGN:-0}" != "1" ]] \
+    && [[ -z "$(developer_id_identity)" ]] && ! legacy_identity_installed; then
     echo "▸ No signing identity installed; creating the stable local one…"
     if ! ./Tools/setup-signing.sh; then
         echo "  ⚠ Tools/setup-signing.sh failed; signing ad-hoc instead." >&2
@@ -154,7 +154,9 @@ finalize_installed_bundle_after_child() {
 
     echo "▸ Finalizing installed signature…"
     sleep 3
-    if [[ -n "$devid" ]]; then
+    if [[ "${VORSSAINT_ADHOC_SIGN:-0}" == "1" ]]; then
+        /usr/bin/codesign --force --strip-disallowed-xattrs --sign - "$bundle"
+    elif [[ -n "$devid" ]]; then
         codesign_with_timestamp_retry --force --strip-disallowed-xattrs --options runtime --timestamp \
             --entitlements "$ENTITLEMENTS" --sign "$devid" "$bundle"
     elif legacy_identity_installed; then
@@ -317,11 +319,14 @@ xattr -c -r "$STAGE" 2>/dev/null || true
 #   2. "Vorssaint Utils Signing" — the legacy stable self-signed identity, kept
 #      as a fallback so contributors without a Developer ID still get a constant
 #      designated requirement across their local builds.
-#   3. Ad-hoc — fresh clone with no identity at all.
+#   3. Ad-hoc — fresh clone with no identity at all. VORSSAINT_ADHOC_SIGN=1
+#      forces this path even when an identity is installed.
 DEVID="$(developer_id_identity)"
 codesign_app() {
     local target="$1"
-    if [[ -n "$DEVID" ]]; then
+    if [[ "${VORSSAINT_ADHOC_SIGN:-0}" == "1" ]]; then
+        codesign --force --strip-disallowed-xattrs --sign - "$target"
+    elif [[ -n "$DEVID" ]]; then
         codesign_with_timestamp_retry --force --strip-disallowed-xattrs --options runtime --timestamp \
             --entitlements "$ENTITLEMENTS" --sign "$DEVID" "$target"
     elif legacy_identity_installed; then
@@ -335,7 +340,9 @@ sign_bundle() {
     local bundle="$1"
     local executable="$bundle/Contents/MacOS/$EXECUTABLE"
 
-    if [[ -n "$DEVID" ]]; then
+    if [[ "${VORSSAINT_ADHOC_SIGN:-0}" == "1" ]]; then
+        echo "  signing ad-hoc (VORSSAINT_ADHOC_SIGN=1)"
+    elif [[ -n "$DEVID" ]]; then
         echo "  signing with Developer ID (hardened runtime): $DEVID"
     elif legacy_identity_installed; then
         echo "  signing with legacy self-signed identity: $LEGACY_IDENTITY"

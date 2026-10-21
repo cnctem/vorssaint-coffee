@@ -30,4 +30,4 @@ Security fixes land on the latest released version. Before you report, please ma
 
 ## Scope
 
-Vorssaint Coffee runs locally and ships as a signed and notarized macOS app. The reports that matter most are the ones that could affect the integrity of the app or that could let its permissions, or the closed-lid `sudoers.d` rule, be misused.
+Vorssaint Coffee runs locally and ships ad-hoc signed (not notarized), so macOS asks you to confirm the first launch. The reports that matter most are the ones that could affect the integrity of the app or that could let its permissions, or the closed-lid `sudoers.d` rule, be misused.
